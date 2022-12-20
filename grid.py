@@ -40,30 +40,91 @@ class Fluid:
         self.p_Field = np.zeros((grid_y + 2, grid_x + 2))
         
     def non_ghost_itteration(self):
+        '''
+        Test function to iron out the logic of ittereating over fields without
+        touching the ghost cells.
+
+        '''
         for i in range(self.grid_y + 1):
+            #Itterate over rows, +1 to account for y_vfield stagard positions
             for j in range(self.grid_x + 1):
+                #Itterate over collumns, +1 to account for x_vfield stagard positions
                 if i != self.grid_y and j != self.grid_x:
+                    #Leaves border of p field unchanged
                     self.p_Field[i + 1, j + 1] = 1
                 else:
                     pass
                 
                 if i != self.grid_y:
+                    #Leaves top and botton border of x_vfield unchanged
                     self.x_vField[i + 1, j] = 1
                 else:
                     pass
                 
                 if j != self.grid_x:
+                    #Leaves left and right border of y_vfield unchanged
                     self.y_vField[i, j + 1] = 1
                 else:
-                    pass
-                
-                # self.x_vField
-                # self.y_vField
-                
-                
-            
-    
+                     pass
+                 
+    def avg_u(self, i, j):
+        '''
+        Works out the u and averaged v componnent of velocity at a stagard u
+        point. U is taken as velocity at grid point, v is averaged over adjecent
+        y_vField grid points.
+
+        Parameters
+        ----------
+        i : int
+            Row index of stagard point.
+        j : int
+            Column index of stagard point.
+
+        Returns
+        -------
+        averaged_u_field : numpy array
+            Contains u and avearged v field at x velocity grid point.
+
+        '''
         
+        x_component = self.x_vField[i , j]
+        
+        y_component = (self.y_vField[i - 1, j] + self.y_vField[i - 1, j + 1] + 
+                       self.y_vField[i, j] + self.y_vField[i, j + 1]) / 4
+        
+        averaged_u_field = np.array([x_component, y_component])
+        
+        return averaged_u_field
+    
+    def avg_v(self, i, j):
+        '''
+        Works out the averaged u and v componnent of velocity at a stagard v
+        point. V is taken as velocity at grid point, u is averaged over adjecent
+        x_vField grid points.
+
+        Parameters
+        ----------
+        i : int
+            Row index of stagard point.
+        j : int
+            Column index of stagard point.
+
+        Returns
+        -------
+        averaged_u_field : numpy array
+            Contains u and avearged v field at x velocity grid point.
+
+        '''
+        
+        x_component = (self.x_vField[i, j-1], self.x_vField[i, j] +
+                       self.x_vField[i + 1, j - 1] + self.x_vField[i + 1, j]) / 4
+        
+        y_component = self.y_vField[i, j]
+        
+        averaged_v_field = np.array([x_component, y_component])
+        
+        return averaged_v_field
+    
 
 def stagard_grid(grid_x, grid_y):
     '''
